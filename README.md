@@ -14,11 +14,11 @@ docker run -d \
   -e PORT0=3456 \
   -e LOGGING_SVC_U=<user> \
   -e LOGGING_SVC_P=<pass> \
-  -e DCOS_URL=https://ui.dcos.dev.bed.athenahealth.com \
+  -e DCOS_URL=https://my.dcos.com \
   -e NODE_ID=b69b2027-ecfb-4b8c-b025-5dae47f450c9-S1 \
   -e KAFKA_ID=c26f14da-cb71-46e2-852a-e4c9f327df8d-0001  \
   -p 9091:3456 \
-  wallnerryan/kafkascraper:latest
+  wallnerryan/kafkascraper:0.0.5
 
 curl http://localhost:3456/metrics
 ```
@@ -49,7 +49,7 @@ Assuming you have the following setup
     "type": "DOCKER",
     "volumes": [],
     "docker": {
-      "image": "docker.artifactory.aws.athenahealth.com/devops/kafkascraper:0.0.5",
+      "image": "wallnerryan/kafkascraper:0.0.5",
       "network": "BRIDGE",
       "portMappings": [
         {
@@ -74,7 +74,7 @@ Assuming you have the following setup
   },
   "secrets": {
     "secret0": {
-      "source": "logging/svcuserpassword"
+      "source": "logging/password"
     }
   },
   "unreachableStrategy": {
@@ -87,10 +87,10 @@ Assuming you have the following setup
     "LOGGING_SVC_P": {
       "secret": "secret0"
     },
-    "DCOS_URL": "https://ui.dcos.dev.bed.athenahealth.com",
+    "DCOS_URL": "https://my.dcos.com",
     "NODE_ID": "beea2d96-715d-42be-a9a2-f3487d078642-S51",
     "KAFKA_ID": "c26f14da-cb71-46e2-852a-e4c9f327df8d-0001",
-    "LOGGING_SVC_U": "pvtc_logging_user"
+    "LOGGING_SVC_U": "logging_user"
   }
 }
 ```
