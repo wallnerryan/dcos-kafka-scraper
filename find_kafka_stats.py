@@ -1,9 +1,5 @@
 #!/usr/bin/env python
 
-# HOW TO USE
-# (ALL NODES) dcos node | sed "1 d" | awk '{print $3}' | xargs -I{} ./find_kafka_stats.py $(dcos config show core.dcos_acs_token) <KafkaFrameworkID> {}
-# (ONE NODE) ./find_kafka_stats.py $(dcos config show core.dcos_acs_token) <KafkaFrameworkID> <NodeID> 
-
 from prometheus_client import start_http_server, Metric, REGISTRY
 import requests
 requests.packages.urllib3.disable_warnings()
