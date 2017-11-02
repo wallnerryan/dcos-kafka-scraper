@@ -20,7 +20,7 @@ docker run -d \
   -p 9091:3456 \
   wallnerryan/kafkascraper:0.0.5
 
-curl http://localhost:3456/metrics
+curl http://localhost:9091/metrics
 ```
 
 ## Marathon
