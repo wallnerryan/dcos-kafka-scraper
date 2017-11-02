@@ -7,6 +7,8 @@ import json
 import commands
 import sys, os
 import time
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 class KafkaJsonCollector(object):
   def __init__(self, url, node_id, kafka_id, svc_u, svc_p):
@@ -18,27 +20,34 @@ class KafkaJsonCollector(object):
     self._token = "none"
 
   def get_token(self):
-     print "Getting New Auth Token"
+     logging.info("Getting New Auth Token")
      payload={"uid": self._svc_u, "password": self._svc_p }
-     token_r = requests.post('%s/acs/api/v1/auth/login' % self._url, data=json.dumps(payload), headers={'Content-Type': 'application/json'}, verify=False)
+     token_r = requests.post('%s/acs/api/v1/auth/login' % self._url, 
+                             data=json.dumps(payload), 
+                             headers={'Content-Type': 'application/json'},
+                             verify=False)
      if token_r.status_code == 200:
        token_json=json.loads(token_r.content)
        self._token = token_json['token']
 
   def collect(self):
 
-     r = requests.get('%s/system/v1/agent/%s/metrics/v0/containers' % (self._url, self._node_id),  headers={'Authorization': 'token='+self._token}, verify=False)
+     r = requests.get('%s/system/v1/agent/%s/metrics/v0/containers' % (self._url, self._node_id),
+                      headers={'Authorization': 'token='+self._token},
+                      verify=False)
 
      # if failed, refresh token
      if r.status_code == 401:
-         print "Failed auth, getting new auth token"
+         logging.info("Failed auth, getting new auth token")
          self.get_token()
          self.collect()
      else:
          containers=r.json()
 
          for c in containers:
-           r = requests.get('%s/system/v1/agent/%s/metrics/v0/containers/%s/app' % (self._url, self._node_id, c),  headers={'Authorization': 'token='+self._token}, verify=False)
+           r = requests.get('%s/system/v1/agent/%s/metrics/v0/containers/%s/app' % (self._url, self._node_id, c),
+                            headers={'Authorization': 'token='+self._token},
+                            verify=False)
            try:
              app=json.loads(r.content)
              if 'dimensions' in app:
@@ -50,17 +59,16 @@ class KafkaJsonCollector(object):
                         metric.add_sample(dp_removed_dashes, value=dp[u'value'], labels={})
                         yield metric
                         print "%s:%d" % (dp[u'name'], dp[u'value'])
-                    print "FOUND KAFKA CONTAINER " + c
-                    print "Framework " + app['dimensions']['framework_id']
-                    print "Executor " + app['dimensions']['executor_id']
-                    print "Host " + app['dimensions']['hostname']
-                    print "Task " + app['dimensions']['task_name']
-                    print "Task ID " + app['dimensions']['task_id']
+                    logging.info("FOUND KAFKA CONTAINER " + c)
+                    logging.info("Framework " + app['dimensions']['framework_id'])
+                    logging.info("Executor " + app['dimensions']['executor_id'])
+                    logging.info("Host " + app['dimensions']['hostname'])
+                    logging.info("Task " + app['dimensions']['task_name'])
+                    logging.info("Task ID " + app['dimensions']['task_id'])
 
            except Exception as e:
+             logging.warning(e)
              pass
-             #print e
-             #print "issue getting json"
 
 if __name__ == "__main__":
    if sys.argv[1] == "--help" or sys.argv[1] == "help" or sys.argv[1] == "-help":
